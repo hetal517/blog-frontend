@@ -37,15 +37,16 @@ function Home() {
 
         try {
 
-            await API.delete(`/blogs/delete/${id}`);
+            const res = await API.delete(`/blogs/delete/${id}`);
 
-            toast.success("Blog Deleted");
+            toast.success(res.data.message || "Blog Deleted");
 
             fetchBlogs();
 
         } catch (error) {
 
             console.log(error);
+            toast.error(error.response?.data?.message || "Delete failed");
 
         }
 
@@ -64,6 +65,7 @@ function Home() {
         } catch (error) {
 
             console.log(error);
+            toast.error(error.response?.data?.message || "Like failed");
 
         }
 

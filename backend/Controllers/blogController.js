@@ -81,56 +81,82 @@ const getSingleBlog = async (req, res) => {
 // update blog
 const updateBlog = async (req, res) => {
     try {
+
         const { title, content } = req.body;
 
         const blog = await Blog.findById(req.params.id);
 
-        //check if blog exists
+        // Check if blog exists
         if (!blog) {
             return res.status(404).json({
                 message: "Blog not found"
             });
         }
 
-        //update blog
+        
+        if (blog.author.toString() !== req.user.id) {
+            return res.status(403).json({
+                message: "You are not authorized to update this blog"
+            });
+        }
+
+        // Update blog
         blog.title = title || blog.title;
         blog.content = content || blog.content;
+
+        // Agar image update bhi karni ho
+        if (req.file) {
+            blog.image = req.file.path;
+        }
 
         await blog.save();
 
         res.status(200).json({
-            message: "Blog upadated successfully",
+            message: "Blog updated successfully",
             blog
         });
 
     } catch (error) {
+
         res.status(500).json({
             message: error.message
         });
+
     }
 };
-
-//DElete Blog
+// Delete Blog
 const deleteBlog = async (req, res) => {
+
     try {
+
         const blog = await Blog.findById(req.params.id);
 
-        //check if blog exists
         if (!blog) {
             return res.status(404).json({
                 message: "Blog not found"
             });
         }
-        await blog.deleteOne();
+
+        if (blog.author.toString() !== req.user.id) {
+            return res.status(403).json({
+                message: "You are not authorized to delete this blog"
+            });
+        }
+
+        await Blog.findByIdAndDelete(req.params.id);
 
         res.status(200).json({
-            message: "Blog Deleted successfully"
+            message: "Blog deleted successfully"
         });
+
     } catch (error) {
+
         res.status(500).json({
             message: error.message
         });
+
     }
+
 };
 
 // Like Blog
